@@ -1,0 +1,33 @@
+import random
+
+num_people = int(input("Enter the number of friends joining (including you):\n"))
+
+if num_people <= 0:
+    print("No one is joining for the party")
+else:
+    print("Enter the name of every friend (including you), each on a new line:")
+    party_dict = {}
+    for _ in range(num_people):
+        name = input()
+        party_dict[name] = 0
+
+    bill_value = int(input("Enter the total bill value:\n"))
+
+    lucky = input('Do you want to use the "Who is lucky?" feature? Write Yes/No:\n')
+
+    if lucky == "Yes":
+        lucky_person = random.choice(list(party_dict.keys()))
+        print(f"{lucky_person} is the lucky one!")
+
+        split_value = round(bill_value / (num_people - 1), 2)
+
+        for person in party_dict:
+            party_dict[person] = 0 if person == lucky_person else split_value
+
+    else:
+        print("No one is going to be lucky")
+        split_value = round(bill_value / num_people, 2)
+        for person in party_dict:
+            party_dict[person] = split_value
+
+    print(party_dict)
