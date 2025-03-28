@@ -1,0 +1,76 @@
+import math
+import argparse
+
+# Parsing
+parser = argparse.ArgumentParser()
+
+parser.add_argument("--type", type=str, help="Type of payment: 'annuity' or 'diff'")
+parser.add_argument("--principal", type=int, help="Loan principal amount")
+parser.add_argument("--payment", type=float, help="Monthly payment amount")
+parser.add_argument("--periods", type=int, help="Number of months to repay the loan")
+parser.add_argument("--interest", type=float, help="Annual interest rate (without %)")
+
+args = parser.parse_args()
+
+# Assigning arguments
+payment_type = args.type
+principal = args.principal
+payment = args.payment
+periods = args.periods
+interest = args.interest
+
+# Validate input parameters
+if not payment_type or payment_type not in ["annuity", "diff"]:
+    print("Incorrect parameters")
+elif interest is None or interest <= 0:
+    print("Incorrect parameters")
+elif principal is not None and principal < 0:
+    print("Incorrect parameters")
+elif payment is not None and payment < 0:
+    print("Incorrect parameters")
+elif periods is not None and periods < 0:
+    print("Incorrect parameters")
+elif payment_type == "diff" and payment is not None:
+    print("Incorrect parameters")
+elif payment_type == "diff" and (principal is None or periods is None):
+    print("Incorrect parameters")
+elif payment_type == "annuity" and sum(x is not None for x in [principal, payment, periods]) < 2:
+    print("Incorrect parameters")
+else:
+    # Monthly interest rate
+    i = interest / (12 * 100)
+
+    # Differentiated payment calculation
+    if payment_type == "diff":
+        total_payment = 0
+        for m in range(1, periods + 1):
+            diff_payment = math.ceil((principal / periods) + i * (principal - (principal * (m - 1)) / periods))
+            total_payment += diff_payment
+            print(f"Month {m}: payment is {diff_payment}")
+        overpayment = total_payment - principal
+        print(f"Overpayment = {overpayment}")
+
+    # Annuity payment calculations
+    elif payment_type == "annuity":
+        if payment is None:
+            payment = math.ceil(principal * (i * math.pow(1 + i, periods)) / (math.pow(1 + i, periods) - 1))
+            print(f"Your annuity payment = {payment}!")
+            overpayment = (payment * periods) - principal
+            print(f"Overpayment = {overpayment}")
+        elif principal is None:
+            principal = math.floor(payment / ((i * math.pow(1 + i, periods)) / (math.pow(1 + i, periods) - 1)))
+            print(f"Your loan principal = {principal}!")
+            overpayment = (payment * periods) - principal
+            print(f"Overpayment = {overpayment}")
+        elif periods is None:
+            periods = math.ceil(math.log(payment / (payment - i * principal), 1 + i))
+            years = periods // 12
+            months = periods % 12
+            if years > 0 and months > 0:
+                print(f"It will take {years} years and {months} months to repay this loan!")
+            elif years > 0:
+                print(f"It will take {years} years to repay this loan!")
+            else:
+                print(f"It will take {months} months to repay this loan!")
+            overpayment = (payment * periods) - principal
+            print(f"Overpayment = {overpayment}")
